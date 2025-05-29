@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WeatherSphere | Modern Weather App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Hiệu ứng thời tiết -->
+  <div id="weatherEffects"></div>
+
+  <div class="app-container">
+    <div class="search-container glassmorphism">
+      <h1 class="app-title"><i class="fas fa-cloud-sun"></i> WeatherSphere</h1>
+      <form id="weatherForm" class="search-form">
+        <div class="search-input-container">
+          <input type="text" id="cityInput" placeholder="Search for a city..." required />
+          <button type="submit" class="search-button" id="searchBtn">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </form>
+      <div id="errorMessage" class="error-message hidden"></div>
+    </div>
+
+    <div id="loadingState" class="glassmorphism loading hidden">
+      <i class="fas fa-spinner"></i>
+      <p>Loading weather data...</p>
+    </div>
+
+    <div id="weatherResult" class="weather-card glassmorphism hidden">
+      <div class="weather-header">
+        <h2 id="locationName" class="location-name"></h2>
+        <div id="currentDate" class="current-date"></div>
+      </div>
+
+      <div class="weather-main">
+        <div class="weather-icon-container">
+          <div id="weatherIcon"></div>
+          <p id="weatherDesc" class="weather-description"></p>
+        </div>
+
+        <div class="temp-info">
+          <p class="temp"><span id="temperature"></span>°C</p>
+          <div class="temp-range">
+            <span id="tempMax"><i class="fas fa-temperature-high"></i> <span class="value"></span>°</span>
+            <span id="tempMin"><i class="fas fa-temperature-low"></i> <span class="value"></span>°</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="weather-details">
+        <div class="detail-card">
+          <i class="fas fa-tint detail-icon"></i>
+          <div class="detail-info">
+            <span class="detail-label">Humidity</span>
+            <span id="humidity" class="detail-value"></span>%
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <i class="fas fa-wind detail-icon"></i>
+          <div class="detail-info">
+            <span class="detail-label">Wind</span>
+            <span id="windSpeed" class="detail-value"></span> km/h
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <i class="fas fa-sun detail-icon"></i>
+          <div class="detail-info">
+            <span class="detail-label">UV Index</span>
+            <span id="uvIndex" class="detail-value"></span>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <i class="fas fa-sunrise detail-icon"></i>
+          <div class="detail-info">
+            <span class="detail-label">Sunrise</span>
+            <span id="sunrise" class="detail-value"></span>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <i class="fas fa-sunset detail-icon"></i>
+          <div class="detail-info">
+            <span class="detail-label">Sunset</span>
+            <span id="sunset" class="detail-value"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
