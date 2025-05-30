@@ -32,6 +32,75 @@ body {
   transition: all 2s ease-in-out;
 }
 
+/* ===== Real Time Clock ===== */
+.real-time-clock {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  margin: -10px 0 15px 0;
+  text-align: center;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.real-time-clock i {
+  font-size: 0.9rem;
+  color: var(--accent-color);
+}
+
+/* ===== Last Updated Info ===== */
+.last-updated {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: -15px 0 15px 0;
+  padding: 8px 15px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: slideUp 0.4s ease-out;
+}
+
+.last-updated i {
+  font-size: 0.8rem;
+  color: var(--accent-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive cho mobile */
+@media (max-width: 600px) {
+  .real-time-clock {
+    font-size: 0.95rem;
+    padding: 6px 0;
+    margin: -10px 0 10px 0;
+  }
+  
+  .last-updated {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    margin: -8px 0 12px 0;
+  }
+}
+
 /* Dynamic Weather Backgrounds */
 body.day {
   background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #00b894 100%);
@@ -94,7 +163,7 @@ body.foggy {
 
 @keyframes rainFall {
   0% {
-    transform: translateY(-100px) translateX(0);
+    transform: translate3d(0, -100px, 0);
     opacity: 0;
   }
   10% {
@@ -104,7 +173,7 @@ body.foggy {
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) translateX(50px);
+    transform: translate3d(50px, 100vh, 0);
     opacity: 0;
   }
 }
@@ -396,6 +465,7 @@ body.foggy {
 .search-input-container {
   position: relative;
   display: flex;
+  width: 100%;
 }
 
 #cityInput {
@@ -445,6 +515,7 @@ body.foggy {
 
 /* Weather Card Styles */
 .weather-card {
+  -webkit-transform: translateY(0);
   padding: 25px;
   color: white;
   opacity: 0;
@@ -469,6 +540,8 @@ body.foggy {
 }
 
 .current-date {
+  margin-bottom: 10px; 
+  display: block;
   font-size: 0.9rem;
   opacity: 0.8;
 }
@@ -632,4 +705,45 @@ body.foggy {
   .temp {
     font-size: 3rem;
   }
+}
+
+/* Tối ưu cho mobile */
+@media (max-width: 768px) {
+  .glassmorphism {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  #weatherEffects > * {
+    display: none;
+  }
+  
+  /* Chỉ giữ lại 1-2 hiệu ứng cơ bản */
+  .rain, .snow {
+    display: block;
+    animation-duration: 1s !important;
+  }
+
+  /* Tắt các hiệu ứng phức tạp */
+  .cloud:before, 
+  .cloud:after, 
+  .sun:before {
+    display: none;
+  }
+
+  /* Giảm số lượng và kích thước hiệu ứng */
+  .rain, .snow {
+    width: 1px !important;
+    animation-duration: 0.8s !important;
+  }
+}
+
+/* Tối ưu hiệu suất chung */
+/* Buộc phần cứng tăng tốc animation */
+.rain, .snow, .cloud, #weatherIcon {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
 }
