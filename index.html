@@ -1,39 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WeatherSphere | Modern Weather App</title>
+  <title>WeatherSphere | Ứng dụng Thời tiết Hiện đại</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Hiệu ứng thời tiết -->
+  <!-- Container hiệu ứng thời tiết nền -->
   <div id="weatherEffects"></div>
 
+  <!-- Container chính của ứng dụng -->
   <div class="app-container">
+    
+    <!-- Phần tìm kiếm -->
     <div class="search-container glassmorphism">
-      <h1 class="app-title"><i class="fas fa-cloud-sun"></i> WeatherSphere</h1>
+      <header class="app-header">
+        <h1 class="app-title"><i class="fas fa-cloud-sun"></i> WeatherSphere</h1>
+        <div id="realTimeClock" class="real-time-clock">
+          <i class="far fa-clock"></i> <span id="currentTime"></span>
+        </div>
+      </header>
+
       <form id="weatherForm" class="search-form">
         <div class="search-input-container">
-          <input type="text" id="cityInput" placeholder="Tìm kiếm thành phố" required />
+          <input type="text" id="cityInput" placeholder="Nhập tên thành phố..." required />
           <button type="submit" class="search-button" id="searchBtn">
             <i class="fas fa-search"></i>
           </button>
         </div>
       </form>
+      
       <div id="errorMessage" class="error-message hidden"></div>
     </div>
 
+    <!-- Trạng thái loading -->
     <div id="loadingState" class="glassmorphism loading hidden">
-      <i class="fas fa-spinner"></i>
-      <p>Đang tải dữ liệu</p>
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Đang tải dữ liệu thời tiết...</p>
     </div>
 
+    <!-- Kết quả thời tiết -->
     <div id="weatherResult" class="weather-card glassmorphism hidden">
       <div class="weather-header">
         <h2 id="locationName" class="location-name"></h2>
         <div id="currentDate" class="current-date"></div>
+        <div id="lastUpdated" class="last-updated hidden">
+          <i class="fas fa-sync-alt"></i> <span>Cập nhật lúc: </span><span id="updateTime"></span>
+        </div>
       </div>
 
       <div class="weather-main">
@@ -51,7 +66,9 @@
         </div>
       </div>
 
+      <!-- Chi tiết thời tiết -->
       <div class="weather-details">
+        <!-- Độ ẩm -->
         <div class="detail-card">
           <i class="fas fa-tint detail-icon"></i>
           <div class="detail-info">
@@ -60,14 +77,16 @@
           </div>
         </div>
 
+        <!-- Gió -->
         <div class="detail-card">
           <i class="fas fa-wind detail-icon"></i>
           <div class="detail-info">
-            <span class="detail-label">Gió</span>
+            <span class="detail-label">Tốc độ gió</span>
             <span id="windSpeed" class="detail-value"></span> km/h
           </div>
         </div>
 
+        <!-- UV -->
         <div class="detail-card">
           <i class="fas fa-sun detail-icon"></i>
           <div class="detail-info">
@@ -76,6 +95,7 @@
           </div>
         </div>
 
+        <!-- Bình minh -->
         <div class="detail-card">
           <i class="fas fa-sunrise detail-icon"></i>
           <div class="detail-info">
@@ -84,6 +104,7 @@
           </div>
         </div>
 
+        <!-- Hoàng hôn -->
         <div class="detail-card">
           <i class="fas fa-sunset detail-icon"></i>
           <div class="detail-info">
