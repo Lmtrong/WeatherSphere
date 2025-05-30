@@ -1,3 +1,36 @@
+// Hàm cập nhật đồng hồ thời gian thực
+function updateRealTimeClock() {
+  const now = new Date();
+  const options = { 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  };
+  const timeString = now.toLocaleTimeString('vi-VN', options);
+  
+  const clockElement = document.getElementById('realTimeClock');
+  if (clockElement) {
+    clockElement.innerHTML = `<i class="far fa-clock"></i> ${timeString}`;
+  }
+}
+
+// Trong hàm submit form:
+const now = new Date();
+const options = { 
+  day: '2-digit', 
+  month: '2-digit', 
+  year: 'numeric',
+  hour: '2-digit', 
+  minute: '2-digit',
+  hour12: false
+};
+const lastUpdatedString = `<i class="fas fa-sync-alt"></i> Cập nhật lúc ${now.toLocaleTimeString('vi-VN', options)}`;
+document.getElementById('lastUpdated').innerHTML = lastUpdatedString;
+document.getElementById('lastUpdated').classList.remove('hidden');
+
+
+
 document.getElementById("weatherForm").addEventListener("submit", async function (e) {
   e.preventDefault();
   const city = document.getElementById("cityInput").value.trim();
@@ -267,30 +300,30 @@ function createClouds(count) {
   }
 }
 
+// ===== PHÁT HIỆN MOBILE VÀ ĐIỀU CHỈNH HIỆU ỨNG =====
+function isMobile() {
+  return /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+}
+
+// ===== CẬP NHẬT CÁC HÀM TẠO HIỆU ỨNG =====
 function createRain(count, intensity, isFreezing = false) {
   const effectsContainer = document.getElementById("weatherEffects");
-  
-  for (let i = 0; i < count; i++) {
+  const mobileMultiplier = isMobile() ? 0.5 : 1; // Giảm 50% số lượng trên mobile
+
+  for (let i = 0; i < count * mobileMultiplier; i++) {
     const rain = document.createElement('div');
     rain.className = 'rain';
     
-    rain.style.left = `${Math.random() * 100}vw`;
-    rain.style.top = `${Math.random() * -100}px`;
-    rain.style.height = `${Math.random() * 20 + 10}px`;
-    rain.style.opacity = Math.random() * 0.6 + 0.2;
+    // Sử dụng transform thay vì top/left để tối ưu
+    rain.style.transform = `translate(${Math.random() * 100}vw, ${Math.random() * -100}px)`;
     
-    if (isFreezing) {
-      rain.style.background = 'rgba(200, 220, 255, 0.8)';
+    // Giảm độ phức tạp trên mobile
+    if (isMobile()) {
+      rain.style.height = `${Math.random() * 10 + 5}px`;
+      rain.style.opacity = Math.random() * 0.4 + 0.1;
+    } else {
+      rain.style.height = `${Math.random() * 20 + 10}px`;
     }
-    
-    // Different angles for rain
-    const angle = Math.random() * 10 + 10;
-    rain.style.transform = `rotate(${angle}deg)`;
-    
-    // Different speeds based on intensity
-    const duration = 0.5 + Math.random() * 0.5 / intensity;
-    rain.style.animationDuration = `${duration}s`;
-    rain.style.animationDelay = `${Math.random() * 2}s`;
     
     effectsContainer.appendChild(rain);
   }
@@ -298,8 +331,9 @@ function createRain(count, intensity, isFreezing = false) {
 
 function createSnow(count) {
   const effectsContainer = document.getElementById("weatherEffects");
-  
-  for (let i = 0; i < count; i++) {
+  const mobileMultiplier = isMobile() ? 0.5 : 1; // Giảm 50% số lượng trên mobile
+
+  for (let i = 0; i < count * mobileMultiplier; i++) {
     const snow = document.createElement('div');
     snow.className = 'snow';
     
@@ -320,8 +354,8 @@ function createSnow(count) {
 
 function createFog() {
   const effectsContainer = document.getElementById("weatherEffects");
-  
-  for (let i = 0; i < 20; i++) {
+  const mobileMultiplier = isMobile() ? 0.5 : 1; // Giảm 50% số lượng trên mobile
+  for (let i = 0; i < 20 * mobileMultiplier; i++) {
     const fog = document.createElement('div');
     fog.className = 'fog';
     
@@ -444,3 +478,7 @@ style.textContent = `
   }
   `;
 document.head.appendChild(style);
+// ===== PHÁT HIỆN MOBILE VÀ ĐIỀU CHỈNH HIỆU ỨNG =====
+function isMobile() {
+  return /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+}
