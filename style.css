@@ -713,7 +713,7 @@ body.foggy {
 }
 
 /* Tối ưu cho mobile */
-@media (max-width: 768px) {
+@media (max-width: 830px) {
   .glassmorphism {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
