@@ -787,45 +787,66 @@ body.foggy {
 }
 
 /* Tối ưu cho mobile */
+/* Tối ưu cho mobile */
 @media (max-width: 768px) {
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    min-height: 100vh;
+  }
+
   .glassmorphism {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     background: rgba(255, 255, 255, 0.2);
   }
 
-  /* Không tắt toàn bộ hiệu ứng trong #weatherEffects */
-  #weatherEffects>* {
-    display: block;
-    /* Giữ tất cả hiệu ứng hiển thị */
+  /* Giữ lại các hiệu ứng cơ bản nhưng tối ưu */
+  #weatherEffects {
+    z-index: -1;
   }
 
-  /* Tối ưu các hiệu ứng cụ thể */
   .rain {
     width: 1px !important;
     height: 10px !important;
-    /* Giảm chiều cao để nhẹ hơn */
-    animation-duration: 2s !important;
-    /* Tăng thời gian để mượt hơn */
+    animation: rainFall 2s linear infinite !important;
+    opacity: 0.6;
   }
 
   .snow {
-    width: 4px !important;
-    height: 4px !important;
-    animation-duration: 3s !important;
+    width: 3px !important;
+    height: 3px !important;
+    animation: snowFall 3s linear infinite !important;
   }
 
   .cloud {
-    width: 50px !important;
-    height: 30px !important;
-    animation-duration: 15s !important;
+    width: 60px !important;
+    height: 40px !important;
+    animation: cloudFloat 15s linear infinite !important;
+    opacity: 0.5;
   }
 
-  /* Tắt các pseudo-element phức tạp để giảm tải trên mobile */
+  /* Tắt các hiệu ứng phức tạp */
   .cloud:before,
   .cloud:after,
-  .sun:before {
-    display: none;
+  .sun:before,
+  .thunder,
+  .fog {
+    display: none !important;
+  }
+
+  /* Đảm bảo container chính hiển thị đúng */
+  .app-container {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  /* Tối ưu kích thước text */
+  .app-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .location-name {
+    font-size: 1.3rem !important;
   }
 }
 
