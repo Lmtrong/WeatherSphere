@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,14 +8,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/x-icon" href="icon.png">
+
 </head>
+
 <body>
   <!-- Container hiệu ứng thời tiết nền -->
   <div id="weatherEffects"></div>
 
   <!-- Container chính của ứng dụng -->
   <div class="app-container">
-    
+
     <!-- Phần tìm kiếm -->
     <div class="search-container glassmorphism">
       <header class="app-header">
@@ -32,7 +35,7 @@
           </button>
         </div>
       </form>
-      
+
       <div id="errorMessage" class="error-message hidden"></div>
     </div>
 
@@ -115,8 +118,31 @@
         </div>
       </div>
     </div>
+
+    <div class="temperature-chart ">
+      <h3 class="chart-title">
+        <i class="fas fa-chart-line"></i>
+        Biểu đồ nhiệt độ hôm nay
+      </h3>
+      <div class="chart-container">
+        <canvas id="temperatureChart" width="400" height="200"></canvas>
+      </div>
+      <div class="chart-summary">
+        <div class="summary-item">
+          <span class="summary-label">Thấp nhất:</span>
+          <span id="chartMinTemp" class="summary-value">--°</span>
+          <span id="chartMinTime" class="summary-time">--:--</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Cao nhất:</span>
+          <span id="chartMaxTemp" class="summary-value">--°</span>
+          <span id="chartMaxTime" class="summary-time">--:--</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
 </body>
+
 </html>
