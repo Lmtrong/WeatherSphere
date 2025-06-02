@@ -76,13 +76,27 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive cho mobile */
@@ -92,7 +106,7 @@ body {
     padding: 6px 0;
     margin: -10px 0 10px 0;
   }
-  
+
   .last-updated {
     font-size: 0.8rem;
     padding: 6px 12px;
@@ -127,8 +141,13 @@ body.foggy {
 }
 
 @keyframes stormyBackground {
-  0% { filter: brightness(0.7); }
-  100% { filter: brightness(1.2); }
+  0% {
+    filter: brightness(0.7);
+  }
+
+  100% {
+    filter: brightness(1.2);
+  }
 }
 
 /* Weather Effects Container */
@@ -162,7 +181,7 @@ body.foggy {
 
 @keyframes rainFall {
   0% {
-    transform: translate3d(0, -100px, 0);
+    transform: translateY(-100px) translateX(0);
     opacity: 0;
   }
   10% {
@@ -172,7 +191,7 @@ body.foggy {
     opacity: 1;
   }
   100% {
-    transform: translate3d(50px, 100vh, 0);
+    transform: translateY(100vh) translateX(50px);
     opacity: 0;
   }
 }
@@ -199,12 +218,15 @@ body.foggy {
     transform: translateY(-100px) translateX(0) rotate(0deg);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh) translateX(100px) rotate(360deg);
     opacity: 0;
@@ -246,6 +268,7 @@ body.foggy {
   0% {
     transform: translateX(-200px);
   }
+
   100% {
     transform: translateX(calc(100vw + 200px));
   }
@@ -257,7 +280,7 @@ body.foggy {
   background: radial-gradient(circle, #fff700 0%, #ffed4e 30%, #ff9500 70%, #ff6b35 100%);
   border-radius: 50%;
   animation: sunGlow 4s ease-in-out infinite alternate, sunRotate 20s linear infinite;
-  box-shadow: 
+  box-shadow:
     0 0 20px #fff700,
     0 0 40px #ffed4e,
     0 0 60px #ff9500,
@@ -278,15 +301,16 @@ body.foggy {
 
 @keyframes sunGlow {
   0% {
-    box-shadow: 
+    box-shadow:
       0 0 20px #fff700,
       0 0 40px #ffed4e,
       0 0 60px #ff9500,
       0 0 80px #ff6b35;
     transform: scale(1);
   }
+
   100% {
-    box-shadow: 
+    box-shadow:
       0 0 30px #fff700,
       0 0 60px #ffed4e,
       0 0 90px #ff9500,
@@ -296,13 +320,25 @@ body.foggy {
 }
 
 @keyframes sunRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes sunHalo {
-  0% { opacity: 0.3; transform: scale(1); }
-  100% { opacity: 0.1; transform: scale(1.2); }
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0.1;
+    transform: scale(1.2);
+  }
 }
 
 /* Enhanced Fog Effects */
@@ -330,12 +366,15 @@ body.foggy {
     transform: translateX(-100px);
     opacity: 0;
   }
+
   20% {
     opacity: 0.6;
   }
+
   80% {
     opacity: 0.6;
   }
+
   100% {
     transform: translateX(100px);
     opacity: 0;
@@ -353,20 +392,29 @@ body.foggy {
 }
 
 @keyframes thunder {
-  0%, 90%, 100% {
+
+  0%,
+  90%,
+  100% {
     opacity: 0;
   }
-  1%, 3%, 5% {
+
+  1%,
+  3%,
+  5% {
     opacity: 0;
   }
+
   2% {
     opacity: 0.9;
     background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.5) 30%, rgba(255, 255, 255, 0) 70%);
   }
+
   4% {
     opacity: 0.7;
     background: radial-gradient(circle at 70% 40%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 255, 255, 0) 70%);
   }
+
   6% {
     opacity: 0.5;
     background: radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 30%, rgba(255, 255, 255, 0) 70%);
@@ -393,12 +441,15 @@ body.foggy {
 }
 
 @keyframes twinkle {
-  0%, 100% { 
-    opacity: 0.3; 
+
+  0%,
+  100% {
+    opacity: 0.3;
     transform: scale(1);
   }
-  50% { 
-    opacity: 1; 
+
+  50% {
+    opacity: 1;
     transform: scale(1.2);
   }
 }
@@ -408,20 +459,27 @@ body.foggy {
   position: absolute;
   width: 2px;
   height: 100vh;
-  background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 1) 20%,
-    rgba(135, 206, 235, 1) 40%,
-    rgba(255, 255, 255, 1) 60%,
-    rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 1) 20%,
+      rgba(135, 206, 235, 1) 40%,
+      rgba(255, 255, 255, 1) 60%,
+      rgba(255, 255, 255, 0) 100%);
   opacity: 0;
   animation: lightning 0.2s ease-in-out;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
 }
 
 @keyframes lightning {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Glassmorphism Effect */
@@ -439,13 +497,16 @@ body.foggy {
   max-width: 500px;
   display: flex;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
   flex-direction: column;
   gap: 20px;
   z-index: 10;
   position: relative;
 }
+
 .app-container::-webkit-scrollbar {
   display: none;
 }
@@ -545,7 +606,7 @@ body.foggy {
 }
 
 .current-date {
-  margin-bottom: 10px; 
+  margin-bottom: 10px;
   display: block;
   font-size: 0.9rem;
   opacity: 0.8;
@@ -569,8 +630,13 @@ body.foggy {
 }
 
 @keyframes iconFloat {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-10px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-10px);
+  }
 }
 
 .weather-description {
@@ -664,8 +730,13 @@ body.foggy {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error Message */
@@ -690,55 +761,57 @@ body.foggy {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .temp-info {
     text-align: center;
   }
-  
+
   .weather-details {
     grid-template-columns: 1fr;
   }
-  
+
   .app-title {
     font-size: 1.5rem;
   }
-  
+
   .location-name {
     font-size: 1.5rem;
   }
-  
+
   .temp {
     font-size: 3rem;
   }
 }
 
 /* Tối ưu cho mobile */
-@media (max-width: 830px) {
+@media (max-width: 768px) {
   .glassmorphism {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     background: rgba(255, 255, 255, 0.2);
   }
-  
-  #weatherEffects > * {
+
+  #weatherEffects>* {
     display: none;
   }
-  
+
   /* Chỉ giữ lại 1-2 hiệu ứng cơ bản */
-  .rain, .snow {
+  .rain,
+  .snow {
     display: block;
     animation-duration: 1s !important;
   }
 
   /* Tắt các hiệu ứng phức tạp */
-  .cloud:before, 
-  .cloud:after, 
+  .cloud:before,
+  .cloud:after,
   .sun:before {
     display: none;
   }
 
   /* Giảm số lượng và kích thước hiệu ứng */
-  .rain, .snow {
+  .rain,
+  .snow {
     width: 1px !important;
     animation-duration: 0.8s !important;
   }
@@ -746,9 +819,119 @@ body.foggy {
 
 /* Tối ưu hiệu suất chung */
 /* Buộc phần cứng tăng tốc animation */
-.rain, .snow, .cloud, #weatherIcon {
+.rain,
+.snow,
+.cloud,
+#weatherIcon {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   perspective: 1000px;
   will-change: transform, opacity;
+}
+
+/* Temperature Chart Styles */
+.temperature-chart {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chart-title {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chart-title i {
+  color: var(--accent-color);
+}
+
+.chart-container {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+#temperatureChart {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 200px;
+}
+
+.chart-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 15px;
+  border-radius: 10px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 3px;
+}
+
+.summary-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.summary-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+
+/* Responsive cho biểu đồ */
+@media (max-width: 600px) {
+  .temperature-chart {
+    padding: 15px;
+    margin-top: 20px;
+  }
+
+  .chart-title {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .chart-container {
+    padding: 10px;
+  }
+
+  .chart-summary {
+    gap: 10px;
+  }
+
+  .summary-item {
+    padding: 8px 12px;
+    min-width: 100px;
+  }
+
+  .summary-value {
+    font-size: 1rem;
+  }
 }
