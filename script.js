@@ -154,6 +154,11 @@ function showError(message) {
 
 // Weather Effects
 function createWeatherEffects(weatherCode) {
+  const originalCreateWeatherEffects = createWeatherEffects;
+  createWeatherEffects = function (weatherCode) {
+    cleanupWeatherEffects();
+    originalCreateWeatherEffects.call(this, weatherCode);
+  };
   const effectsContainer = document.getElementById("weatherEffects");
   effectsContainer.innerHTML = '';
 
@@ -654,5 +659,105 @@ function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
   }
 }
 
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+// Override createRain function cho iOS
+if (isIOS()) {
+  window.originalCreateRain = createRain;
+  createRain = function (count, intensity, isFreezing = false) {
+    const effectsContainer = document.getElementById("weatherEffects");
+    const reducedCount = Math.min(count * 0.3, 25); // Giảm 70% và tối đa 25 giọt
+
+    for (let i = 0; i < reducedCount; i++) {
+      const rain = document.createElement('div');
+      rain.className = 'rain';
+      rain.style.animationDuration = `${Math.random() * 2 + 2}s`;
+      rain.style.animationDelay = `${Math.random() * 1}s`;
+      rain.style.left = `${Math.random() * 100}vw`;
+      rain.style.top = `${Math.random() * -50}px`;
+      rain.style.height = `${Math.random() * 15 + 8}px`;
+      rain.style.opacity = '0.7';
+
+      effectsContainer.appendChild(rain);
+    }
+  };
+
+  // Override createSnow function cho iOS  
+  window.originalCreateSnow = createSnow;
+  createSnow = function (count) {
+    const effectsContainer = document.getElementById("weatherEffects");
+    const reducedCount = Math.min(count * 0.4, 40); // Giảm 60% và tối đa 40 bông
+
+    for (let i = 0; i < reducedCount; i++) {
+      const snow = document.createElement('div');
+      snow.className = 'snow';
+      snow.style.left = `${Math.random() * 100}vw`;
+      snow.style.top = `${Math.random() * -50}px`;
+      snow.style.width = `${Math.random() * 6 + 3}px`;
+      snow.style.height = snow.style.width;
+      snow.style.opacity = '0.8';
+
+      const duration = 3 + Math.random() * 3;
+      snow.style.animationDuration = `${duration}s`;
+      snow.style.animationDelay = `${Math.random() * 2}s`;
+
+      effectsContainer.appendChild(snow);
+    }
+  };
+
+  // Override createClouds function cho iOS
+  window.originalCreateClouds = createClouds;
+  createClouds = function (count) {
+    const effectsContainer = document.getElementById("weatherEffects");
+    const reducedCount = Math.min(count * 0.5, 8); // Giảm 50% và tối đa 8 đám mây
+
+    for (let i = 0; i < reducedCount; i++) {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+
+      const size = Math.random() * 60 + 40;
+      cloud.style.width = `${size}px`;
+      cloud.style.height = `${size * 0.6}px`;
+      cloud.style.left = `${Math.random() * 100}vw`;
+      cloud.style.top = `${Math.random() * 25}vh`;
+      cloud.style.opacity = '0.6';
+      cloud.style.animationDuration = `${Math.random() * 20 + 15}s`;
+
+      effectsContainer.appendChild(cloud);
+    }
+  };
+
+  // Override createFog function cho iOS
+  window.originalCreateFog = createFog;
+  createFog = function () {
+    const effectsContainer = document.getElementById("weatherEffects");
+
+    for (let i = 0; i < 8; i++) { // Chỉ 8 fog elements
+      const fog = document.createElement('div');
+      fog.className = 'fog';
+
+      const size = Math.random() * 120 + 80;
+      fog.style.width = `${size}px`;
+      fog.style.height = `${size * 0.3}px`;
+      fog.style.left = `${Math.random() * 100}vw`;
+      fog.style.top = `${Math.random() * 100}vh`;
+      fog.style.opacity = '0.4';
+      fog.style.animationDuration = `${Math.random() * 40 + 20}s`;
+
+      effectsContainer.appendChild(fog);
+    }
+  };
+}
+
+// Clean up function để xóa effects cũ
+function cleanupWeatherEffects() {
+  const effectsContainer = document.getElementById("weatherEffects");
+  if (effectsContainer) {
+    effectsContainer.innerHTML = '';
+  }
+}
 
 
