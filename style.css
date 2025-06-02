@@ -800,9 +800,14 @@ body.foggy {
   }
 
   /* Giữ lại các hiệu ứng cơ bản nhưng tối ưu */
-  #weatherEffects {
-    z-index: -1;
+  #weatherEffects > * {
+    display: none;
   }
+  /* Chỉ giữ lại 1-2 hiệu ứng cơ bản */
+  /* .rain, .snow {
+    display: block;
+    animation-duration: 1s !important;
+  } */
 
   .rain {
     width: 1px !important;
@@ -965,141 +970,5 @@ body.foggy {
 
   .summary-value {
     font-size: 1rem;
-  }
-}
-
-@supports (-webkit-touch-callout: none) {
-  /* iOS Safari detection */
-  
-  /* Giảm độ phức tạp của backdrop-filter trên iOS */
-  .glassmorphism {
-    backdrop-filter: blur(5px) !important;
-    -webkit-backdrop-filter: blur(5px) !important;
-    background: rgba(255, 255, 255, 0.25) !important;
-  }
-
-  /* Tối ưu rain effects cho iOS */
-  .rain {
-    background: rgba(174, 194, 224, 0.8) !important;
-    transform: translate3d(0, 0, 0) !important;
-    will-change: transform !important;
-  }
-
-  /* Tối ưu snow effects cho iOS */
-  .snow {
-    background: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: none !important;
-    transform: translate3d(0, 0, 0) !important;
-  }
-
-  /* Simplify cloud effects cho iOS */
-  .cloud {
-    background: rgba(255, 255, 255, 0.6) !important;
-    box-shadow: none !important;
-  }
-
-  .cloud:before,
-  .cloud:after {
-    display: none !important;
-  }
-
-  /* Tối ưu sun effects cho iOS */
-  .sun {
-    background: radial-gradient(circle, #fff700 0%, #ffed4e 100%) !important;
-    box-shadow: 0 0 20px rgba(255, 247, 0, 0.6) !important;
-  }
-
-  .sun:before {
-    display: none !important;
-  }
-
-  /* Simplify fog effects cho iOS */
-  .fog {
-    filter: blur(4px) !important;
-    background: rgba(255, 255, 255, 0.3) !important;
-  }
-
-  /* Thunder effects đơn giản hóa */
-  .thunder {
-    background: rgba(255, 255, 255, 0.5) !important;
-  }
-}
-
-/* Fix cho iPad specifically */
-@media only screen 
-  and (min-device-width: 768px) 
-  and (max-device-width: 1024px) 
-  and (-webkit-min-device-pixel-ratio: 1) {
-  
-  #weatherEffects {
-    will-change: auto !important;
-    transform: translate3d(0, 0, 0) !important;
-  }
-
-  /* Giảm số lượng particles trên iPad */
-  .rain:nth-child(n+50) {
-    display: none !important;
-  }
-
-  .snow:nth-child(n+80) {
-    display: none !important;
-  }
-
-  .cloud:nth-child(n+15) {
-    display: none !important;
-  }
-}
-
-/* Fix cho iPhone specifically */
-@media only screen 
-  and (max-device-width: 896px) 
-  and (-webkit-min-device-pixel-ratio: 2) {
-  
-  /* Tắt animations phức tạp trên iPhone */
-  .rain,
-  .snow,
-  .cloud {
-    animation-duration: 3s !important;
-    opacity: 0.6 !important;
-  }
-
-  /* Giảm mạnh số lượng effects */
-  .rain:nth-child(n+30) {
-    display: none !important;
-  }
-
-  .snow:nth-child(n+50) {
-    display: none !important;
-  }
-
-  .cloud:nth-child(n+8) {
-    display: none !important;
-  }
-
-  .fog:nth-child(n+8) {
-    display: none !important;
-  }
-}
-
-/* Performance optimization cho tất cả iOS devices */
-@supports (-webkit-touch-callout: none) {
-  /* Force hardware acceleration nhưng limit */
-  .rain,
-  .snow,
-  .cloud {
-    -webkit-transform: translate3d(0, 0, 0);
-    -webkit-backface-visibility: hidden;
-    -webkit-perspective: 1000px;
-  }
-
-  /* Tắt smooth scrolling có thể conflict */
-  body {
-    -webkit-overflow-scrolling: auto !important;
-  }
-
-  /* Fix viewport cho iOS */
-  .app-container {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
   }
 }
