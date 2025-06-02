@@ -184,12 +184,15 @@ body.foggy {
     transform: translateY(-100px) translateX(0);
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   90% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh) translateX(50px);
     opacity: 0;
@@ -791,29 +794,38 @@ body.foggy {
     background: rgba(255, 255, 255, 0.2);
   }
 
+  /* Không tắt toàn bộ hiệu ứng trong #weatherEffects */
   #weatherEffects>* {
-    display: none;
-  }
-
-  /* Chỉ giữ lại 1-2 hiệu ứng cơ bản */
-  .rain,
-  .snow {
     display: block;
-    animation-duration: 1s !important;
+    /* Giữ tất cả hiệu ứng hiển thị */
   }
 
-  /* Tắt các hiệu ứng phức tạp */
+  /* Tối ưu các hiệu ứng cụ thể */
+  .rain {
+    width: 1px !important;
+    height: 10px !important;
+    /* Giảm chiều cao để nhẹ hơn */
+    animation-duration: 2s !important;
+    /* Tăng thời gian để mượt hơn */
+  }
+
+  .snow {
+    width: 4px !important;
+    height: 4px !important;
+    animation-duration: 3s !important;
+  }
+
+  .cloud {
+    width: 50px !important;
+    height: 30px !important;
+    animation-duration: 15s !important;
+  }
+
+  /* Tắt các pseudo-element phức tạp để giảm tải trên mobile */
   .cloud:before,
   .cloud:after,
   .sun:before {
     display: none;
-  }
-
-  /* Giảm số lượng và kích thước hiệu ứng */
-  .rain,
-  .snow {
-    width: 1px !important;
-    animation-duration: 0.8s !important;
   }
 }
 
