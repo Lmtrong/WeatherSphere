@@ -154,26 +154,17 @@ function showError(message) {
 
 // Weather Effects
 function createWeatherEffects(weatherCode) {
-  // Cleanup previous effects
   cleanupWeatherEffects();
-  const originalCreateWeatherEffects = createWeatherEffects;
-  createWeatherEffects = function (weatherCode) {
-    cleanupWeatherEffects();
-    originalCreateWeatherEffects.call(this, weatherCode);
-  };
-
   const effectsContainer = document.getElementById("weatherEffects");
   effectsContainer.innerHTML = '';
 
   const isIPad = isSafariOnIPad();
-  const scaleFactor = isIPad ? 0.6 : 1;
+  const scaleFactor = isIPad ? 0.3 : 1; // Giảm mạnh hơn, từ 0.6 xuống 0.3
   const isDay = new Date().getHours() > 6 && new Date().getHours() < 18;
 
-  // Clear existing classes
   document.body.className = '';
   document.body.classList.add(isDay ? 'day' : 'night');
 
-  // Define count and intensity based on weather code
   let count, intensity;
   switch (true) {
     case weatherCode === 0: // Clear sky
@@ -186,10 +177,7 @@ function createWeatherEffects(weatherCode) {
         sun.style.right = '50px';
         effectsContainer.appendChild(sun);
       } else {
-        count = 50; // Number of stars
-        if (isIPad) {
-          count = Math.floor(count * scaleFactor);
-        }
+        count = isIPad ? 10 : 50; // Giảm số lượng sao trên iPad
         for (let i = 0; i < count; i++) {
           const star = document.createElement('div');
           star.className = 'star';
@@ -207,10 +195,7 @@ function createWeatherEffects(weatherCode) {
       break;
 
     case weatherCode === 1 || weatherCode === 2: // Partly cloudy
-      count = 3;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 1 : 3; // Giảm số lượng mây
       createClouds(count);
       if (isDay) {
         const sun = document.createElement('div');
@@ -225,132 +210,100 @@ function createWeatherEffects(weatherCode) {
       break;
 
     case weatherCode === 3: // Overcast
-      count = 25;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 5 : 25; // Giảm số lượng mây
       createClouds(count);
       break;
 
     case weatherCode === 45 || weatherCode === 48: // Fog
-      createFog();
+      if (!isIPad) createFog(); // Tắt sương mù trên iPad
+      document.body.classList.add('foggy');
       break;
 
     case weatherCode >= 51 && weatherCode <= 55: // Drizzle
-      count = 50;
+      count = isIPad ? 5 : 50; // Giảm mạnh số lượng giọt mưa
       intensity = 1;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-        intensity = Math.max(1, intensity * scaleFactor);
+      if (!isIPad) {
+        createRain(count, intensity);
       }
-      createRain(count, intensity);
-      count = 3;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 1 : 3;
       createClouds(count);
+      document.body.classList.add('rainy');
       break;
 
     case weatherCode === 56 || weatherCode === 57: // Freezing drizzle
-      count = 50;
+      count = isIPad ? 5 : 50;
       intensity = 1;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-        intensity = Math.max(1, intensity * scaleFactor);
+      if (!isIPad) {
+        createRain(count, intensity, true);
       }
-      createRain(count, intensity, true);
-      count = 3;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 1 : 3;
       createClouds(count);
+      document.body.classList.add('rainy');
       break;
 
     case weatherCode >= 61 && weatherCode <= 65: // Rain
-      count = 100;
+      count = isIPad ? 10 : 100;
       intensity = 2;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-        intensity = Math.max(1, intensity * scaleFactor);
+      if (!isIPad) {
+        createRain(count, intensity);
       }
-      createRain(count, intensity);
-      count = 4;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 2 : 4;
       createClouds(count);
+      document.body.classList.add('rainy');
       break;
 
     case weatherCode === 66 || weatherCode === 67: // Freezing rain
-      count = 100;
+      count = isIPad ? 10 : 100;
       intensity = 2;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-        intensity = Math.max(1, intensity * scaleFactor);
+      if (!isIPad) {
+        createRain(count, intensity, true);
       }
-      createRain(count, intensity, true);
-      count = 4;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 2 : 4;
       createClouds(count);
+      document.body.classList.add('rainy');
       break;
 
     case weatherCode >= 71 && weatherCode <= 77: // Snow
-      count = 150;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
+      count = isIPad ? 10 : 150;
+      if (!isIPad) {
+        createSnow(count);
       }
-      createSnow(count);
-      count = 4;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 2 : 4;
       createClouds(count);
+      document.body.classList.add('snowy');
       break;
 
     case weatherCode >= 80 && weatherCode <= 82: // Rain showers
-      count = 150;
+      count = isIPad ? 15 : 150;
       intensity = 3;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-        intensity = Math.max(1, intensity * scaleFactor);
+      if (!isIPad) {
+        createRain(count, intensity);
       }
-      createRain(count, intensity);
-      count = 5;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 2 : 5;
       createClouds(count);
+      document.body.classList.add('rainy');
       break;
 
     case weatherCode === 85 || weatherCode === 86: // Snow showers
-      count = 200;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
+      count = isIPad ? 15 : 200;
+      if (!isIPad) {
+        createSnow(count);
       }
-      createSnow(count);
-      count = 5;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 2 : 5;
       createClouds(count);
+      document.body.classList.add('snowy');
       break;
 
     case weatherCode >= 95 && weatherCode <= 99: // Thunderstorm
-      count = 200;
+      count = isIPad ? 15 : 200;
       intensity = 3;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-        intensity = Math.max(1, intensity * scaleFactor);
+      if (!isIPad) {
+        createRain(count, intensity);
+        createThunder();
       }
-      createRain(count, intensity);
-      count = 6;
-      if (isIPad) {
-        count = Math.floor(count * scaleFactor);
-      }
+      count = isIPad ? 2 : 6;
       createClouds(count);
-      createThunder();
+      document.body.classList.add('stormy');
       break;
 
     default:
