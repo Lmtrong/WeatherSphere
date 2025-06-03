@@ -1,772 +1,1032 @@
-// Hàm cập nhật đồng hồ thời gian thực
-function updateRealTimeClock() {
-  const now = new Date();
-  const options = {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  };
-  const timeString = now.toLocaleTimeString('vi-VN', options);
+/* Modern CSS Reset */
+:root {
+  --primary-color: #4361ee;
+  --secondary-color: #3f37c9;
+  --accent-color: #4895ef;
+  --text-color: #2b2d42;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+  --success-color: #4cc9f0;
+  --danger-color: #f72585;
+  --warning-color: #f8961e;
+  --info-color: #4cc9f0;
+}
 
-  const clockElement = document.getElementById('realTimeClock');
-  if (clockElement) {
-    clockElement.innerHTML = `<i class="far fa-clock"></i> ${timeString}`;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  color: var(--text-color);
+  position: relative;
+  transition: all 2s ease-in-out;
+}
+
+/* ===== Real Time Clock ===== */
+.real-time-clock {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  margin: -10px 0 15px 0;
+  text-align: center;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.real-time-clock i {
+  font-size: 0.9rem;
+  color: var(--accent-color);
+}
+
+/* ===== Last Updated Info ===== */
+.last-updated {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: -15px 0 15px 0;
+  padding: 8px 15px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: slideUp 0.4s ease-out;
+}
+
+.last-updated i {
+  font-size: 0.8rem;
+  color: var(--accent-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// Trong hàm submit form:
-const now = new Date();
-const options = {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false
-};
-const lastUpdatedString = `<i class="fas fa-sync-alt"></i> Cập nhật lúc ${now.toLocaleTimeString('vi-VN', options)}`;
-document.getElementById('lastUpdated').innerHTML = lastUpdatedString;
-document.getElementById('lastUpdated').classList.remove('hidden');
-
-
-
-document.getElementById("weatherForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const city = document.getElementById("cityInput").value.trim();
-  const resultDiv = document.getElementById("weatherResult");
-  const loadingDiv = document.getElementById("loadingState");
-  const errorDiv = document.getElementById("errorMessage");
-  const searchBtn = document.getElementById("searchBtn");
-
-  if (!city) return;
-
-  try {
-    // Show loading state
-    hideAllStates();
-    loadingDiv.classList.remove("hidden");
-    searchBtn.disabled = true;
-
-    console.log("Searching for city:", city);
-
-    // Get city coordinates
-    const geoResponse = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en`
-    );
-
-    if (!geoResponse.ok) {
-      throw new Error("Failed to connect to geocoding service");
-    }
-
-    const geoData = await geoResponse.json();
-    console.log("Geocoding response:", geoData);
-
-    if (!geoData.results || geoData.results.length === 0) {
-      throw new Error("City not found. Please try another name.");
-    }
-
-    const { latitude, longitude, name, country, admin1 } = geoData.results[0];
-    console.log("Found coordinates:", { latitude, longitude, name, country, admin1 });
-
-    // Get weather data
-    const weatherResponse = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
-      `&current_weather=true` +
-      `&hourly=relativehumidity_2m,uv_index` +
-      `&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset` +
-      `&timezone=auto` +
-      `&forecast_days=1`
-    );
-
-    if (!weatherResponse.ok) {
-      throw new Error("Failed to connect to weather service");
-    }
-
-    const weatherData = await weatherResponse.json();
-    console.log("Weather response:", weatherData);
-
-    if (!weatherData.current_weather) {
-      throw new Error("Weather data not available for this location.");
-    }
-
-    // Process data
-    const current = weatherData.current_weather;
-    const daily = weatherData.daily;
-    const hourly = weatherData.hourly;
-
-    const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[0] : "N/A";
-    const uvIndex = hourly.uv_index ? Math.round(hourly.uv_index[0] || 0) : "N/A";
-    const sunrise = formatTime(daily.sunrise ? daily.sunrise[0] : null);
-    const sunset = formatTime(daily.sunset ? daily.sunset[0] : null);
-    const weatherDesc = mapWeatherCode(current.weathercode);
-    const weatherIcon = getWeatherIcon(current.weathercode);
-
-    // Update UI
-    document.getElementById("locationName").textContent = `${name}${admin1 ? `, ${admin1}` : ''}, ${country}`;
-    document.getElementById("currentDate").textContent = formatDate(current.time);
-    document.getElementById("temperature").textContent = Math.round(current.temperature);
-    document.getElementById("weatherDesc").textContent = weatherDesc;
-    document.getElementById("weatherIcon").innerHTML = `<i class="${weatherIcon}"></i>`;
-    document.getElementById("windSpeed").textContent = Math.round(current.windspeed);
-    document.getElementById("humidity").textContent = humidity;
-    document.getElementById("uvIndex").textContent = uvIndex;
-    document.getElementById("sunrise").textContent = sunrise;
-    document.getElementById("sunset").textContent = sunset;
-
-    if (daily.temperature_2m_max && daily.temperature_2m_min) {
-      document.getElementById("tempMax").querySelector(".value").textContent = Math.round(daily.temperature_2m_max[0]);
-      document.getElementById("tempMin").querySelector(".value").textContent = Math.round(daily.temperature_2m_min[0]);
-    }
-
-    // Create weather effects based on weather code
-    createWeatherEffects(current.weathercode);
-
-    // Show results with animation
-    hideAllStates();
-    resultDiv.classList.remove("hidden");
-    setTimeout(() => {
-      resultDiv.classList.add("show");
-      // Tạo biểu đồ nhiệt độ
-      createTemperatureChart(latitude, longitude);
-    }, 50);
-
-  } catch (error) {
-    console.error("Error fetching weather data:", error);
-    hideAllStates();
-    showError(error.message || "Failed to get weather data. Please try again.");
-  } finally {
-    searchBtn.disabled = false;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-});
 
-function hideAllStates() {
-  document.getElementById("weatherResult").classList.add("hidden");
-  document.getElementById("weatherResult").classList.remove("show");
-  document.getElementById("loadingState").classList.add("hidden");
-  document.getElementById("errorMessage").classList.add("hidden");
-}
-
-function showError(message) {
-  const errorDiv = document.getElementById("errorMessage");
-  errorDiv.textContent = message;
-  errorDiv.classList.remove("hidden");
-}
-
-// Weather Effects
-function createWeatherEffects(weatherCode) {
-  const originalCreateWeatherEffects = createWeatherEffects;
-  createWeatherEffects = function (weatherCode) {
-    cleanupWeatherEffects();
-    originalCreateWeatherEffects.call(this, weatherCode);
-  };
-  const effectsContainer = document.getElementById("weatherEffects");
-  effectsContainer.innerHTML = '';
-
-  const isDay = new Date().getHours() > 6 && new Date().getHours() < 18;
-
-  // Clear existing classes
-  document.body.className = '';
-
-  // Add base class
-  document.body.classList.add(isDay ? 'day' : 'night');
-
-  // Create effects based on weather code
-  switch (true) {
-    // Clear sky
-    case weatherCode === 0:
-      if (isDay) {
-        // Create sun
-        const sun = document.createElement('div');
-        sun.className = 'sun';
-        sun.style.width = '100px';
-        sun.style.height = '100px';
-        sun.style.top = '50px';
-        sun.style.right = '50px';
-        effectsContainer.appendChild(sun);
-      } else {
-        // Create stars
-        for (let i = 0; i < 50; i++) {
-          const star = document.createElement('div');
-          star.className = 'star';
-          star.style.width = `${Math.random() * 3 + 1}px`;
-          star.style.height = star.style.width;
-          star.style.left = `${Math.random() * 100}vw`;
-          star.style.top = `${Math.random() * 100}vh`;
-          star.style.backgroundColor = 'white';
-          star.style.borderRadius = '50%';
-          star.style.opacity = Math.random();
-          star.style.animation = `twinkle ${Math.random() * 5 + 3}s infinite`;
-          effectsContainer.appendChild(star);
-        }
-      }
-      break;
-
-    // Partly cloudy
-    case weatherCode === 1 || weatherCode === 2:
-      createClouds(3);
-      if (isDay) {
-        const sun = document.createElement('div');
-        sun.className = 'sun';
-        sun.style.width = '80px';
-        sun.style.height = '80px';
-        sun.style.top = '30px';
-        sun.style.right = '30px';
-        sun.style.opacity = '0.7';
-        effectsContainer.appendChild(sun);
-      }
-      break;
-
-    // Overcast
-    case weatherCode === 3:
-      createClouds(25);
-      break;
-
-    // Fog
-    case weatherCode === 45 || weatherCode === 48:
-      createFog();
-      break;
-
-    // Drizzle
-    case weatherCode >= 51 && weatherCode <= 55:
-      createRain(50, 1);
-      createClouds(3);
-      break;
-
-    // Freezing drizzle
-    case weatherCode === 56 || weatherCode === 57:
-      createRain(50, 1, true);
-      createClouds(3);
-      break;
-
-    // Rain
-    case weatherCode >= 61 && weatherCode <= 65:
-      createRain(100, 2);
-      createClouds(4);
-      break;
-
-    // Freezing rain
-    case weatherCode === 66 || weatherCode === 67:
-      createRain(100, 2, true);
-      createClouds(4);
-      break;
-
-    // Snow
-    case weatherCode >= 71 && weatherCode <= 77:
-      createSnow(150);
-      createClouds(4);
-      break;
-
-    // Rain showers
-    case weatherCode >= 80 && weatherCode <= 82:
-      createRain(150, 3);
-      createClouds(5);
-      break;
-
-    // Snow showers
-    case weatherCode === 85 || weatherCode === 86:
-      createSnow(200);
-      createClouds(5);
-      break;
-
-    // Thunderstorm
-    case weatherCode >= 95 && weatherCode <= 99:
-      createRain(200, 3);
-      createClouds(6);
-      createThunder();
-      break;
-
-    default:
-      if (isDay) {
-        const sun = document.createElement('div');
-        sun.className = 'sun';
-        sun.style.width = '100px';
-        sun.style.height = '100px';
-        sun.style.top = '50px';
-        sun.style.right = '50px';
-        effectsContainer.appendChild(sun);
-      }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-function createClouds(count) {
-  const effectsContainer = document.getElementById("weatherEffects");
+/* Responsive cho mobile */
+@media (max-width: 600px) {
+  .real-time-clock {
+    font-size: 0.95rem;
+    padding: 6px 0;
+    margin: -10px 0 10px 0;
+  }
 
-  for (let i = 0; i < count; i++) {
-    const cloud = document.createElement('div');
-    cloud.className = 'cloud';
-
-    const size = Math.random() * 100 + 50;
-    cloud.style.width = `${size}px`;
-    cloud.style.height = `${size * 0.6}px`;
-    cloud.style.left = `${Math.random() * 100}vw`;
-    cloud.style.top = `${Math.random() * 30}vh`;
-    cloud.style.opacity = Math.random() * 0.5 + 0.3;
-    cloud.style.animationDuration = `${Math.random() * 30 + 20}s`;
-
-    effectsContainer.appendChild(cloud);
+  .last-updated {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    margin: -8px 0 12px 0;
   }
 }
 
-// ===== PHÁT HIỆN MOBILE VÀ ĐIỀU CHỈNH HIỆU ỨNG =====
-function isMobile() {
-  return /Android|iPhone|iPod|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+/* Dynamic Weather Backgrounds */
+body.day {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #00b894 100%);
 }
 
-// ===== CẬP NHẬT CÁC HÀM TẠO HIỆU ỨNG =====
-function createRain(count, intensity, isFreezing = false) {
-  const effectsContainer = document.getElementById("weatherEffects");
-  const mobileMultiplier = isMobile() ? 0.5 : 1;
+body.night {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 50%, #74b9ff 100%);
+}
 
-  for (let i = 0; i < count * mobileMultiplier; i++) {
-    const rain = document.createElement('div');
-    rain.className = 'rain';
-    rain.style.animationDuration = `${Math.random() * 3 + 2}s`; // Thời gian từ 2s đến 5s
-    rain.style.animationDelay = `${Math.random() * 2}s`; // Độ trễ từ 0s đến 2s
-    rain.style.left = `${Math.random() * 100}vw`;
-    rain.style.top = `${Math.random() * -100}px`;
+body.rainy {
+  background: linear-gradient(135deg, #636e72 0%, #2d3436 50%, #74b9ff 100%);
+}
 
-    if (isMobile()) {
-      rain.style.height = `${Math.random() * 10 + 5}px`;
-      rain.style.opacity = Math.random() * 0.4 + 0.1;
-    } else {
-      rain.style.height; rain.style.height = `${Math.random() * 20 + 10}px`;
-    }
+body.snowy {
+  background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 50%, #e0e7ff 100%);
+}
 
-    effectsContainer.appendChild(rain);
+body.stormy {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 30%, #74b9ff 100%);
+  animation: stormyBackground 4s ease-in-out infinite alternate;
+}
+
+body.foggy {
+  background: linear-gradient(135deg, #b2bec3 0%, #ddd6fe 50%, #e17055 100%);
+}
+
+@keyframes stormyBackground {
+  0% {
+    filter: brightness(0.7);
+  }
+
+  100% {
+    filter: brightness(1.2);
   }
 }
 
-function createSnow(count) {
-  const effectsContainer = document.getElementById("weatherEffects");
-  const mobileMultiplier = isMobile() ? 0.8 : 1; // Giảm 20% số lượng trên mobile
+/* Weather Effects Container */
+#weatherEffects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
 
-  for (let i = 0; i < count * mobileMultiplier; i++) {
-    const snow = document.createElement('div');
-    snow.className = 'snow';
+/* Enhanced Rain Effects */
+.rain {
+  position: absolute;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(174, 194, 224, 0), rgba(174, 194, 224, 0.8), rgba(174, 194, 224, 0));
+  animation: rainFall linear infinite;
+  border-radius: 1px;
+}
 
-    snow.style.left = `${Math.random() * 100}vw`;
-    snow.style.top = `${Math.random() * -100}px`;
-    snow.style.width = `${Math.random() * 8 + 4}px`;
-    snow.style.height = snow.style.width;
-    snow.style.opacity = Math.random() * 0.8 + 0.2;
+.rain:nth-child(odd) {
+  background: linear-gradient(to bottom, rgba(135, 206, 235, 0), rgba(135, 206, 235, 0.9), rgba(135, 206, 235, 0));
+}
 
-    // Different speeds and paths for snowflakes
-    const duration = 3 + Math.random() * 5;
-    snow.style.animationDuration = `${duration}s`;
-    snow.style.animationDelay = `${Math.random() * 5}s`;
+.rain:nth-child(3n) {
+  background: linear-gradient(to bottom, rgba(100, 149, 237, 0), rgba(100, 149, 237, 0.7), rgba(100, 149, 237, 0));
+}
 
-    effectsContainer.appendChild(snow);
+@keyframes rainFall {
+  0% {
+    transform: translateY(-100px) translateX(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) translateX(50px);
+    opacity: 0;
   }
 }
 
-function createFog() {
-  const effectsContainer = document.getElementById("weatherEffects");
-  const mobileMultiplier = isMobile() ? 0.5 : 1; // Giảm 50% số lượng trên mobile
-  for (let i = 0; i < 20 * mobileMultiplier; i++) {
-    const fog = document.createElement('div');
-    fog.className = 'fog';
+/* Enhanced Snow Effects */
+.snow {
+  position: absolute;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 70%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 50%;
+  animation: snowFall linear infinite;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
 
-    const size = Math.random() * 200 + 100;
-    fog.style.width = `${size}px`;
-    fog.style.height = `${size * 0.3}px`;
-    fog.style.left = `${Math.random() * 100}vw`;
-    fog.style.top = `${Math.random() * 100}vh`;
-    fog.style.opacity = Math.random() * 0.2 + 0.1;
-    fog.style.animationDuration = `${Math.random() * 60 + 30}s`;
+.snow:nth-child(even) {
+  background: radial-gradient(circle, rgba(240, 248, 255, 1) 0%, rgba(240, 248, 255, 0.9) 60%, rgba(240, 248, 255, 0) 100%);
+}
 
-    effectsContainer.appendChild(fog);
+.snow:nth-child(3n) {
+  background: radial-gradient(circle, rgba(230, 230, 250, 1) 0%, rgba(230, 230, 250, 0.8) 70%, rgba(230, 230, 250, 0) 100%);
+}
+
+@keyframes snowFall {
+  0% {
+    transform: translateY(-100px) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) translateX(100px) rotate(360deg);
+    opacity: 0;
   }
 }
 
-function createThunder() {
-  const thunder = document.createElement('div');
-  thunder.className = 'thunder';
-  document.getElementById("weatherEffects").appendChild(thunder);
+/* Enhanced Cloud Effects */
+.cloud {
+  position: absolute;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 70%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 50px;
+  animation: cloudFloat linear infinite;
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
 }
 
-// Helper functions
-function mapWeatherCode(code) {
-  const weatherCodes = {
-    0: "Trời quang đãng",
-    1: "Trời hầu như quang đãng",
-    2: "Ít mây",
-    3: "Nhiều mây (u ám)",
-    45: "Sương mù nhẹ",
-    48: "Sương mù đóng băng",
-    51: "Mưa phùn nhẹ",
-    53: "Mưa phùn vừa",
-    55: "Mưa phùn dày đặc",
-    56: "Mưa phùn đóng băng nhẹ",
-    57: "Mưa phùn đóng băng dày đặc",
-    61: "Mưa nhẹ",
-    63: "Mưa vừa",
-    65: "Mưa to",
-    66: "Mưa đóng băng nhẹ",
-    67: "Mưa đóng băng nặng",
-    71: "Tuyết nhẹ",
-    73: "Tuyết vừa",
-    75: "Tuyết dày",
-    77: "Bông tuyết nhỏ",
-    80: "Mưa rào nhẹ",
-    81: "Mưa rào vừa",
-    82: "Mưa rào rất to",
-    85: "Tuyết rào nhẹ",
-    86: "Tuyết rào dày",
-    95: "Dông (có sấm sét)",
-    96: "Dông có mưa đá nhẹ",
-    99: "Dông có mưa đá nặng"
-  };
-  return weatherCodes[code] || "Không xác định";
+.cloud:before {
+  content: '';
+  position: absolute;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 70%, rgba(255, 255, 255, 0) 100%);
+  width: 50%;
+  height: 80%;
+  border-radius: 50px;
+  top: -40%;
+  left: 20%;
 }
 
-
-function getWeatherIcon(code) {
-  const isDay = new Date().getHours() > 6 && new Date().getHours() < 18;
-
-  const iconMap = {
-    0: isDay ? "fas fa-sun" : "fas fa-moon",
-    1: isDay ? "fas fa-cloud-sun" : "fas fa-cloud-moon",
-    2: "fas fa-cloud",
-    3: "fas fa-cloud",
-    45: "fas fa-smog",
-    48: "fas fa-smog",
-    51: "fas fa-cloud-rain",
-    53: "fas fa-cloud-rain",
-    55: "fas fa-cloud-rain",
-    56: "fas fa-temperature-low",
-    57: "fas fa-temperature-low",
-    61: "fas fa-cloud-showers-heavy",
-    63: "fas fa-cloud-showers-heavy",
-    65: "fas fa-cloud-showers-heavy",
-    66: "fas fa-icicles",
-    67: "fas fa-icicles",
-    71: "fas fa-snowflake",
-    73: "fas fa-snowflake",
-    75: "fas fa-snowflake",
-    77: "fas fa-snowflake",
-    80: "fas fa-cloud-rain",
-    81: "fas fa-cloud-showers-heavy",
-    82: "fas fa-poo-storm",
-    85: "fas fa-snowflake",
-    86: "fas fa-snowflake",
-    95: "fas fa-bolt",
-    96: "fas fa-poo-storm",
-    99: "fas fa-poo-storm"
-  };
-
-  return iconMap[code] || "fas fa-question";
+.cloud:after {
+  content: '';
+  position: absolute;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 70%, rgba(255, 255, 255, 0) 100%);
+  width: 60%;
+  height: 70%;
+  border-radius: 50px;
+  top: -30%;
+  right: 15%;
 }
 
-function formatTime(isoString) {
-  if (!isoString) return "N/A";
-  try {
-    const time = isoString.split("T")[1].split(":");
-    return `${time[0]}:${time[1]}`;
-  } catch (e) {
-    return "N/A";
+@keyframes cloudFloat {
+  0% {
+    transform: translateX(-200px);
+  }
+
+  100% {
+    transform: translateX(calc(100vw + 200px));
   }
 }
 
-function formatDate(isoString) {
-  try {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(isoString).toLocaleDateString(undefined, options);
-  } catch (e) {
-    return new Date().toLocaleDateString();
+/* Enhanced Sun Effects */
+.sun {
+  position: absolute;
+  background: radial-gradient(circle, #fff700 0%, #ffed4e 30%, #ff9500 70%, #ff6b35 100%);
+  border-radius: 50%;
+  animation: sunGlow 4s ease-in-out infinite alternate, sunRotate 20s linear infinite;
+  box-shadow:
+    0 0 20px #fff700,
+    0 0 40px #ffed4e,
+    0 0 60px #ff9500,
+    0 0 80px #ff6b35;
+}
+
+.sun:before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(255, 247, 0, 0.3) 0%, rgba(255, 237, 78, 0.2) 30%, rgba(255, 149, 0, 0.1) 70%, rgba(255, 107, 53, 0) 100%);
+  border-radius: 50%;
+  top: -10%;
+  left: -10%;
+  animation: sunHalo 6s ease-in-out infinite alternate;
+}
+
+@keyframes sunGlow {
+  0% {
+    box-shadow:
+      0 0 20px #fff700,
+      0 0 40px #ffed4e,
+      0 0 60px #ff9500,
+      0 0 80px #ff6b35;
+    transform: scale(1);
+  }
+
+  100% {
+    box-shadow:
+      0 0 30px #fff700,
+      0 0 60px #ffed4e,
+      0 0 90px #ff9500,
+      0 0 120px #ff6b35;
+    transform: scale(1.05);
   }
 }
 
-// Add twinkle animation for stars
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.2; }
-    50% { opacity: 1; }
+@keyframes sunRotate {
+  from {
+    transform: rotate(0deg);
   }
-  `;
-document.head.appendChild(style);
-// ===== PHÁT HIỆN MOBILE VÀ ĐIỀU CHỈNH HIỆU ỨNG =====
-function isMobile() {
-  return /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-}
 
-
-// Temperature Chart Functions
-let temperatureChart = null;
-
-async function createTemperatureChart(latitude, longitude) {
-  try {
-    // Lấy dữ liệu nhiệt độ theo giờ cho hôm nay
-    const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
-      `&hourly=temperature_2m&timezone=auto&forecast_days=1`
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to get hourly temperature data");
-    }
-
-    const data = await response.json();
-    const hourlyData = data.hourly;
-
-    if (!hourlyData || !hourlyData.temperature_2m) {
-      throw new Error("No hourly temperature data available");
-    }
-
-    // Xử lý dữ liệu
-    const temperatures = hourlyData.temperature_2m;
-    const times = hourlyData.time;
-
-    // Tạo labels (giờ) và data points
-    const labels = times.map(time => {
-      const hour = new Date(time).getHours();
-      return hour.toString().padStart(2, '0') + ':00';
-    });
-
-    // Tìm nhiệt độ cao nhất và thấp nhất
-    const minTemp = Math.min(...temperatures);
-    const maxTemp = Math.max(...temperatures);
-    const minIndex = temperatures.indexOf(minTemp);
-    const maxIndex = temperatures.indexOf(maxTemp);
-
-    // Cập nhật thông tin tóm tắt
-    document.getElementById('chartMinTemp').textContent = Math.round(minTemp) + '°';
-    document.getElementById('chartMaxTemp').textContent = Math.round(maxTemp) + '°';
-    document.getElementById('chartMinTime').textContent = labels[minIndex];
-    document.getElementById('chartMaxTime').textContent = labels[maxIndex];
-
-    // Vẽ biểu đồ
-    drawTemperatureChart(labels, temperatures, minTemp, maxTemp);
-    const chartContainer = document.querySelector('.temperature-chart');
-    chartContainer.classList.remove('hidden');
-    chartContainer.style.display = 'block';
-  } catch (error) {
-    console.error("Error creating temperature chart:", error);
-    // Ẩn biểu đồ nếu có lỗi
-    document.querySelector('.temperature-chart').style.display = 'none';
+  to {
+    transform: rotate(360deg);
   }
 }
 
-
-function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
-  const canvas = document.getElementById('temperatureChart');
-  const ctx = canvas.getContext('2d');
-
-  // Thiết lập kích thước
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * window.devicePixelRatio;
-  canvas.height = 200 * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-  const width = rect.width;
-  const height = 200;
-  const padding = 40;
-  const chartWidth = width - padding * 2;
-  const chartHeight = height - padding * 2;
-
-  // Xóa canvas
-  ctx.clearRect(0, 0, width, height);
-
-  // Trục Y với mốc cố định
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '11px Poppins, sans-serif';
-  ctx.textAlign = 'right';
-
-  // Tính toán khoảng nhiệt độ với buffer
-  const tempRange = maxTemp - minTemp;
-  const buffer = tempRange * 0.2; // Thêm 20% buffer
-  const adjustedMin = minTemp - buffer;
-  const adjustedMax = maxTemp + buffer;
-
-  // Vẽ các mốc nhiệt độ trên trục Y
-  const ySteps = 5;
-  for (let i = 0; i <= ySteps; i++) {
-    const t = adjustedMin + ((adjustedMax - adjustedMin) / ySteps) * i;
-    const y = padding + ((ySteps - i) / ySteps) * chartHeight;
-    ctx.fillText(Math.round(t) + '°', padding - 10, y + 4);
+@keyframes sunHalo {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
   }
 
-  // Tạo gradient dựa trên khoảng nhiệt độ thực tế
-  const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-  gradient.addColorStop(0, '#ff0000');    // Đỏ (nóng) ở trên cùng (nhiệt độ cao)
-  gradient.addColorStop(0.25, '#ff6600'); // Cam
-  gradient.addColorStop(0.5, '#ffff99');  // Vàng nhạt
-  gradient.addColorStop(0.75, '#87ceeb'); // Xanh dương nhạt
-  gradient.addColorStop(1, '#0000cd');    // Xanh đậm (lạnh) ở dưới cùng (nhiệt độ thấp)
-
-  // Tính điểm dữ liệu với cùng công thức như trục Y
-  const points = temperatures.map((temp, index) => ({
-    x: padding + (index / (temperatures.length - 1)) * chartWidth,
-    y: padding + ((adjustedMax - temp) / (adjustedMax - adjustedMin)) * chartHeight,
-    temp: temp,
-    label: labels[index]
-  }));
-
-  // Vẽ vùng nền dưới đường biểu đồ
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, height - padding);
-  points.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(points[points.length - 1].x, height - padding);
-  ctx.closePath();
-  ctx.fillStyle = gradient;
-  ctx.fill();
-
-  // Vẽ đường biểu đồ
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  points.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Vẽ điểm và nhãn
-  points.forEach((p, index) => {
-    // Chỉ vẽ điểm tại các mốc thời gian quan trọng
-    if (index % 4 === 0 || index === points.length - 1) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
-      ctx.fillStyle = 'white';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(72, 149, 239, 0.8)';
-      ctx.stroke();
-
-      // Nhãn nhiệt độ
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 11px Poppins, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(Math.round(p.temp) + '°', p.x, p.y - 10);
-    }
-
-    // Nhãn giờ
-    if (index % 3 === 0 || index === points.length - 1) {
-      const hour = p.label.split(':')[0];
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.font = '12px Poppins, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(hour, p.x, height - 10);
-    }
-  });
-
-  // Grid lines ngang
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= ySteps; i++) {
-    const y = padding + (i / ySteps) * chartHeight;
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(width - padding, y);
-    ctx.stroke();
+  100% {
+    opacity: 0.1;
+    transform: scale(1.2);
   }
 }
 
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-function isIPad() {
-  return /iPad|Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
-}
-
-// Trong hàm createWeatherEffects
-if (isIPad()) {
-  // Giảm bớt nhưng không tắt hẳn hiệu ứng
-  count = Math.floor(count * 0.7); // Giảm 30%
+/* Enhanced Fog Effects */
+.fog {
+  position: absolute;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 50%;
+  filter: blur(8px);
+  animation: fogMove linear infinite;
+  opacity: 0.6;
 }
 
-// Override createRain function cho iOS
-if (isIOS()) {
-  window.originalCreateRain = createRain;
-  createRain = function (count, intensity, isFreezing = false) {
-    const effectsContainer = document.getElementById("weatherEffects");
-    const reducedCount = Math.min(count * 0.3, 25); // Giảm 70% và tối đa 25 giọt
-
-    for (let i = 0; i < reducedCount; i++) {
-      const rain = document.createElement('div');
-      rain.className = 'rain';
-      rain.style.animationDuration = `${Math.random() * 2 + 2}s`;
-      rain.style.animationDelay = `${Math.random() * 1}s`;
-      rain.style.left = `${Math.random() * 100}vw`;
-      rain.style.top = `${Math.random() * -50}px`;
-      rain.style.height = `${Math.random() * 15 + 8}px`;
-      rain.style.opacity = '0.7';
-
-      effectsContainer.appendChild(rain);
-    }
-  };
-
-  // Override createSnow function cho iOS  
-  window.originalCreateSnow = createSnow;
-  createSnow = function (count) {
-    const effectsContainer = document.getElementById("weatherEffects");
-    const reducedCount = Math.min(count * 0.4, 40); // Giảm 60% và tối đa 40 bông
-
-    for (let i = 0; i < reducedCount; i++) {
-      const snow = document.createElement('div');
-      snow.className = 'snow';
-      snow.style.left = `${Math.random() * 100}vw`;
-      snow.style.top = `${Math.random() * -50}px`;
-      snow.style.width = `${Math.random() * 6 + 3}px`;
-      snow.style.height = snow.style.width;
-      snow.style.opacity = '0.8';
-
-      const duration = 3 + Math.random() * 3;
-      snow.style.animationDuration = `${duration}s`;
-      snow.style.animationDelay = `${Math.random() * 2}s`;
-
-      effectsContainer.appendChild(snow);
-    }
-  };
-
-  // Override createClouds function cho iOS
-  window.originalCreateClouds = createClouds;
-  createClouds = function (count) {
-    const effectsContainer = document.getElementById("weatherEffects");
-    const reducedCount = Math.min(count * 0.5, 8); // Giảm 50% và tối đa 8 đám mây
-
-    for (let i = 0; i < reducedCount; i++) {
-      const cloud = document.createElement('div');
-      cloud.className = 'cloud';
-
-      const size = Math.random() * 60 + 40;
-      cloud.style.width = `${size}px`;
-      cloud.style.height = `${size * 0.6}px`;
-      cloud.style.left = `${Math.random() * 100}vw`;
-      cloud.style.top = `${Math.random() * 25}vh`;
-      cloud.style.opacity = '0.6';
-      cloud.style.animationDuration = `${Math.random() * 20 + 15}s`;
-
-      effectsContainer.appendChild(cloud);
-    }
-  };
-
-  // Override createFog function cho iOS
-  window.originalCreateFog = createFog;
-  createFog = function () {
-    const effectsContainer = document.getElementById("weatherEffects");
-
-    for (let i = 0; i < 8; i++) { // Chỉ 8 fog elements
-      const fog = document.createElement('div');
-      fog.className = 'fog';
-
-      const size = Math.random() * 120 + 80;
-      fog.style.width = `${size}px`;
-      fog.style.height = `${size * 0.3}px`;
-      fog.style.left = `${Math.random() * 100}vw`;
-      fog.style.top = `${Math.random() * 100}vh`;
-      fog.style.opacity = '0.4';
-      fog.style.animationDuration = `${Math.random() * 40 + 20}s`;
-
-      effectsContainer.appendChild(fog);
-    }
-  };
+.fog:nth-child(even) {
+  background: radial-gradient(ellipse at center, rgba(245, 245, 245, 0.5) 0%, rgba(245, 245, 245, 0.3) 50%, rgba(245, 245, 245, 0) 100%);
+  filter: blur(12px);
 }
 
-// Clean up function để xóa effects cũ
-function cleanupWeatherEffects() {
-  const effectsContainer = document.getElementById("weatherEffects");
-  if (effectsContainer) {
-    effectsContainer.innerHTML = '';
+.fog:nth-child(3n) {
+  background: radial-gradient(ellipse at center, rgba(235, 235, 235, 0.3) 0%, rgba(235, 235, 235, 0.15) 50%, rgba(235, 235, 235, 0) 100%);
+  filter: blur(15px);
+}
+
+@keyframes fogMove {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.6;
+  }
+
+  80% {
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
   }
 }
 
+/* Enhanced Thunder Effects */
+.thunder {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 30%, rgba(255, 255, 255, 0) 70%);
+  opacity: 0;
+  animation: thunder 6s ease-in-out infinite;
+}
 
+@keyframes thunder {
+
+  0%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+
+  1%,
+  3%,
+  5% {
+    opacity: 0;
+  }
+
+  2% {
+    opacity: 0.9;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.5) 30%, rgba(255, 255, 255, 0) 70%);
+  }
+
+  4% {
+    opacity: 0.7;
+    background: radial-gradient(circle at 70% 40%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 255, 255, 0) 70%);
+  }
+
+  6% {
+    opacity: 0.5;
+    background: radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 30%, rgba(255, 255, 255, 0) 70%);
+  }
+}
+
+/* Stars for Night Sky */
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle linear infinite;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.star:nth-child(even) {
+  background: #ffffcc;
+  box-shadow: 0 0 8px rgba(255, 255, 204, 0.9);
+}
+
+.star:nth-child(3n) {
+  background: #e6f3ff;
+  box-shadow: 0 0 4px rgba(230, 243, 255, 0.7);
+}
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Lightning Effect */
+.lightning {
+  position: absolute;
+  width: 2px;
+  height: 100vh;
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 1) 20%,
+      rgba(135, 206, 235, 1) 40%,
+      rgba(255, 255, 255, 1) 60%,
+      rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  animation: lightning 0.2s ease-in-out;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes lightning {
+
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Glassmorphism Effect */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.app-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  overflow-y: auto;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+  flex-direction: column;
+  gap: 20px;
+  z-index: 10;
+  position: relative;
+}
+
+.app-container::-webkit-scrollbar {
+  display: none;
+}
+
+.search-container {
+  padding: 30px;
+  text-align: center;
+}
+
+.app-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+#cityInput {
+  flex: 1;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#cityInput:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.3);
+}
+
+.search-button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  bottom: 5px;
+  width: 45px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-button:hover {
+  background: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Weather Card Styles */
+.weather-card {
+  -webkit-transform: translateY(0);
+  padding: 25px;
+  color: white;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.weather-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.weather-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.location-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.current-date {
+  margin-bottom: 10px;
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.weather-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.weather-icon-container {
+  text-align: center;
+}
+
+#weatherIcon {
+  font-size: 3.5rem;
+  margin-bottom: 10px;
+  animation: iconFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes iconFloat {
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+.weather-description {
+  font-size: 1.1rem;
+  text-transform: capitalize;
+}
+
+.temp-info {
+  text-align: right;
+}
+
+.temp {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.temp-range {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.temp-range span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#tempMax .value {
+  color: #ff6b6b;
+}
+
+#tempMin .value {
+  color: #74b9ff;
+}
+
+/* Weather Details Grid */
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.detail-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.3s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-5px);
+}
+
+.detail-icon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.detail-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.loading i {
+  animation: spin 1s linear infinite;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Message */
+.error-message {
+  background: rgba(247, 37, 133, 0.2);
+  border: 1px solid rgba(247, 37, 133, 0.3);
+  color: #ff6b6b;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  margin-top: 15px;
+}
+
+/* Hidden state */
+.hidden {
+  display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .weather-main {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .temp-info {
+    text-align: center;
+  }
+
+  .weather-details {
+    grid-template-columns: 1fr;
+  }
+
+  .app-title {
+    font-size: 1.5rem;
+  }
+
+  .location-name {
+    font-size: 1.5rem;
+  }
+
+  .temp {
+    font-size: 3rem;
+  }
+}
+
+/* Tối ưu cho mobile */
+@media (max-width: 768px) {
+  body.day {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #00b894 100%) !important;
+  }
+
+  body.night {
+    background: linear-gradient(135deg, #2d3436 0%, #636e72 50%, #74b9ff 100%) !important;
+  }
+
+  body.rainy {
+    background: linear-gradient(135deg, #636e72 0%, #2d3436 50%, #74b9ff 100%) !important;
+  }
+
+  body.snowy {
+    background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 50%, #e0e7ff 100%) !important;
+  }
+
+  body.stormy {
+    background: linear-gradient(135deg, #2d3436 0%, #636e72 30%, #74b9ff 100%) !important;
+    animation: stormyBackground 4s ease-in-out infinite alternate;
+  }
+
+  body.foggy {
+    background: linear-gradient(135deg, #b2bec3 0%, #ddd6fe 50%, #e17055 100%) !important;
+  }
+
+  .glassmorphism {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Giữ lại các hiệu ứng cơ bản  */
+  #weatherEffects>* {
+    display: none;
+  }
+
+  /* Chỉ giữ lại 1-2 hiệu ứng cơ bản */
+  /* .rain, .snow {
+    display: block;
+    animation-duration: 1s !important;
+  } */
+
+  .rain {
+    width: 1px !important;
+    height: 10px !important;
+    animation: rainFall 2s linear infinite !important;
+    opacity: 0.6;
+  }
+
+  .snow {
+    width: 3px !important;
+    height: 3px !important;
+    animation: snowFall 3s linear infinite !important;
+  }
+
+  .cloud {
+    width: 60px !important;
+    height: 40px !important;
+    animation: cloudFloat 15s linear infinite !important;
+    opacity: 0.5;
+  }
+
+  /* Tắt các hiệu ứng phức tạp */
+  .cloud:before,
+  .cloud:after,
+  .sun:before,
+  .thunder,
+  .fog {
+    display: none !important;
+  }
+
+  /* Đảm bảo container chính hiển thị đúng */
+  .app-container {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  /* Tối ưu kích thước text */
+  .app-title {
+    font-size: 1.5rem !important;
+  }
+
+  .location-name {
+    font-size: 1.3rem !important;
+  }
+}
+/* Fix riêng cho iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+  body {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000;
+    -webkit-perspective: 1000;
+    transform: translate3d(0,0,0);
+    -webkit-transform: translate3d(0,0,0);
+  }
+  
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(5px) !important;
+  }
+  
+  /* Đảm bảo màu nền động hoạt động */
+  body.day, body.night, body.rainy, body.snowy, body.stormy, body.foggy {
+    background: initial !important;
+  }
+  
+  /* Tối ưu hiệu ứng thời tiết */
+  .rain, .snow {
+    opacity: 0.7 !important;
+  }
+}
+
+/* Tối ưu hiệu suất chung */
+/* Buộc phần cứng tăng tốc animation */
+.rain,
+.snow,
+.cloud,
+#weatherIcon {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* Temperature Chart Styles */
+.temperature-chart {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chart-title {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chart-title i {
+  color: var(--accent-color);
+}
+
+.chart-container {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+#temperatureChart {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 200px;
+}
+
+.chart-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 15px;
+  border-radius: 10px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 3px;
+}
+
+.summary-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.summary-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+
+/* Responsive cho biểu đồ */
+@media (max-width: 600px) {
+  .temperature-chart {
+    padding: 15px;
+    margin-top: 20px;
+  }
+
+  .chart-title {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .chart-container {
+    padding: 10px;
+  }
+
+  .chart-summary {
+    gap: 10px;
+  }
+
+  .summary-item {
+    padding: 8px 12px;
+    min-width: 100px;
+  }
+
+  .summary-value {
+    font-size: 1rem;
+  }
+}
+/* Tối ưu cho thiết bị cảm ứng */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cloud:before, .cloud:after, .sun:before {
+    display: none;
+  }
+}
