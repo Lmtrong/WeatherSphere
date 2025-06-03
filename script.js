@@ -309,7 +309,7 @@ function createClouds(count) {
 
 // ===== PHÁT HIỆN MOBILE VÀ ĐIỀU CHỈNH HIỆU ỨNG =====
 function isMobile() {
-  return /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+  return /Android|iPhone|iPod|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
 }
 
 // ===== CẬP NHẬT CÁC HÀM TẠO HIỆU ỨNG =====
@@ -662,6 +662,15 @@ function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
 function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isIPad() {
+  return /iPad|Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+}
+
+// Trong hàm createWeatherEffects
+if (isIPad()) {
+  // Giảm bớt nhưng không tắt hẳn hiệu ứng
+  count = Math.floor(count * 0.7); // Giảm 30%
 }
 
 // Override createRain function cho iOS
