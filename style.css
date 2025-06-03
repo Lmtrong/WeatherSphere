@@ -819,7 +819,7 @@ body.foggy {
     background: rgba(255, 255, 255, 0.2);
   }
 
-  /* Giữ lại các hiệu ứng cơ bản nhưng tối ưu */
+  /* Giữ lại các hiệu ứng cơ bản  */
   #weatherEffects>* {
     display: none;
   }
@@ -872,6 +872,35 @@ body.foggy {
 
   .location-name {
     font-size: 1.3rem !important;
+  }
+}
+/* Tối ưu cho iPad */
+@media (max-width: 1024px) and (min-width: 769px) {
+  /* Giữ nguyên background động cho iPad */
+  body.day, body.night, body.rainy, body.snowy, body.stormy, body.foggy {
+    background: initial !important;
+  }
+  
+  /* Giảm bớt hiệu ứng nhưng không tắt hẳn */
+  #weatherEffects > * {
+    display: block;
+  }
+  
+  /* Tối ưu hiệu ứng cho iPad */
+  .rain {
+    width: 1px !important;
+    height: 15px !important;
+    animation-duration: 2s !important;
+  }
+  
+  .snow {
+    width: 4px !important;
+    height: 4px !important;
+  }
+  
+  .cloud {
+    width: 80px !important;
+    height: 50px !important;
   }
 }
 
@@ -991,5 +1020,16 @@ body.foggy {
 
   .summary-value {
     font-size: 1rem;
+  }
+}
+/* Tối ưu cho thiết bị cảm ứng */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cloud:before, .cloud:after, .sun:before {
+    display: none;
   }
 }
