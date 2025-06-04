@@ -581,13 +581,16 @@ async function createTemperatureChart(latitude, longitude) {
 
 function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
   const canvas = document.getElementById('temperatureChart');
+  if (!canvas) return;
+  
   const ctx = canvas.getContext('2d');
+  const tooltip = document.getElementById('temperatureTooltip');
+  const pixelRatio = window.devicePixelRatio || 1;
 
-  // Thiết lập kích thước
   const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * window.devicePixelRatio;
-  canvas.height = 200 * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  canvas.width = rect.width * pixelRatio;
+  canvas.height = 200 * pixelRatio;
+  ctx.scale(pixelRatio, pixelRatio);
 
   const width = rect.width;
   const height = 200;
@@ -595,45 +598,55 @@ function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding * 2;
 
-  // Xóa canvas
   ctx.clearRect(0, 0, width, height);
 
-  // Trục Y với mốc cố định
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '11px Poppins, sans-serif';
-  ctx.textAlign = 'right';
+  const interpolate = (start, end, steps) => {
+    const result = [];
+    for (let i = 0; i <= steps; i++) {
+      result.push(start + (end - start) * (i / steps));
+    }
+    return result;
+  };
 
-  // Tính toán khoảng nhiệt độ với buffer
+  const interpolatedTemps = [];
+  const originalPointIndices = [];
+  for (let i = 0; i < temperatures.length - 1; i++) {
+    const segment = interpolate(temperatures[i], temperatures[i + 1], 5);
+    interpolatedTemps.push(...segment.slice(0, -1));
+    if (i === 0) originalPointIndices.push(0);
+    originalPointIndices.push(interpolatedTemps.length);
+  }
+  interpolatedTemps.push(temperatures[temperatures.length - 1]);
+
   const tempRange = maxTemp - minTemp;
-  const buffer = tempRange * 0.2; // Thêm 20% buffer
+  const buffer = tempRange * 0.2;
   const adjustedMin = minTemp - buffer;
   const adjustedMax = maxTemp + buffer;
 
-  // Vẽ các mốc nhiệt độ trên trục Y
-  const ySteps = 5;
-  for (let i = 0; i <= ySteps; i++) {
-    const t = adjustedMin + ((adjustedMax - adjustedMin) / ySteps) * i;
-    const y = padding + ((ySteps - i) / ySteps) * chartHeight;
-    ctx.fillText(Math.round(t) + '°', padding - 10, y + 4);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '11px Poppins, sans-serif';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 5; i++) {
+    const temp = adjustedMin + (adjustedMax - adjustedMin) * (i / 5);
+    const y = padding + chartHeight * (1 - i / 5);
+    ctx.fillText(`${Math.round(temp)}°`, padding - 10, y + 4);
   }
 
-  // Tạo gradient dựa trên khoảng nhiệt độ thực tế
   const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-  gradient.addColorStop(0, '#ff0000');    // Đỏ (nóng) ở trên cùng (nhiệt độ cao)
-  gradient.addColorStop(0.25, '#ff6600'); // Cam
-  gradient.addColorStop(0.5, '#ffff99');  // Vàng nhạt
-  gradient.addColorStop(0.75, '#87ceeb'); // Xanh dương nhạt
-  gradient.addColorStop(1, '#0000cd');    // Xanh đậm (lạnh) ở dưới cùng (nhiệt độ thấp)
+  gradient.addColorStop(0, '#ff0000');
+  gradient.addColorStop(0.25, '#ff6600');
+  gradient.addColorStop(0.5, '#ffff99');
+  gradient.addColorStop(0.75, '#87ceeb');
+  gradient.addColorStop(1, '#0000cd');
 
-  // Tính điểm dữ liệu với cùng công thức như trục Y
-  const points = temperatures.map((temp, index) => ({
-    x: padding + (index / (temperatures.length - 1)) * chartWidth,
+  const points = interpolatedTemps.map((temp, index) => ({
+    x: padding + (index / (interpolatedTemps.length - 1)) * chartWidth,
     y: padding + ((adjustedMax - temp) / (adjustedMax - adjustedMin)) * chartHeight,
     temp: temp,
-    label: labels[index]
+    isOriginal: originalPointIndices.includes(index),
+    label: labels[originalPointIndices.indexOf(index)]
   }));
 
-  // Vẽ vùng nền dưới đường biểu đồ
   ctx.beginPath();
   ctx.moveTo(points[0].x, height - padding);
   points.forEach(p => ctx.lineTo(p.x, p.y));
@@ -642,7 +655,6 @@ function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
   ctx.fillStyle = gradient;
   ctx.fill();
 
-  // Vẽ đường biểu đồ
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
   points.forEach(p => ctx.lineTo(p.x, p.y));
@@ -650,44 +662,65 @@ function drawTemperatureChart(labels, temperatures, minTemp, maxTemp) {
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  // Vẽ điểm và nhãn
+  const importantHours = [3, 9, 15, 21];
   points.forEach((p, index) => {
-    // Chỉ vẽ điểm tại các mốc thời gian quan trọng
-    if (index % 4 === 0 || index === points.length - 1) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
-      ctx.fillStyle = 'white';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(72, 149, 239, 0.8)';
-      ctx.stroke();
+    if (p.isOriginal) {
+      const hour = parseInt(p.label.split(':')[0]);
+      if (importantHours.includes(hour) || index === 0 || index === points.length - 1) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(72, 149, 239, 0.8)';
+        ctx.stroke();
 
-      // Nhãn nhiệt độ
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 11px Poppins, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(Math.round(p.temp) + '°', p.x, p.y - 10);
-    }
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 11px Poppins, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${Math.round(p.temp)}°`, p.x, p.y - 10);
 
-    // Nhãn giờ
-    if (index % 3 === 0 || index === points.length - 1) {
-      const hour = p.label.split(':')[0];
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.font = '12px Poppins, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(hour, p.x, height - 10);
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = '12px Poppins, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${hour}h`, p.x, height - 10);
+      }
     }
   });
 
-  // Grid lines ngang
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= ySteps; i++) {
-    const y = padding + (i / ySteps) * chartHeight;
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(width - padding, y);
-    ctx.stroke();
-  }
+  canvas.addEventListener('mousemove', (e) => {
+    if (!tooltip) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    let closestPoint = null;
+    let minDistance = 15 * pixelRatio; 
+
+    points.forEach(p => {
+      const dx = mouseX - p.x * pixelRatio;
+      const dy = mouseY - p.y * pixelRatio;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPoint = p;
+      }
+    });
+
+    if (closestPoint && closestPoint.label) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = `${closestPoint.x + rect.left}px`;
+      tooltip.style.top = `${closestPoint.y + rect.top - 30}px`;
+      tooltip.textContent = `${closestPoint.label} | ${Math.round(closestPoint.temp)}°C`;
+    } else {
+      tooltip.style.display = 'none';
+    }
+  });
+
+  canvas.addEventListener('mouseout', () => {
+    if (tooltip) tooltip.style.display = 'none';
+  });
 }
 
 function isIOS() {
