@@ -997,7 +997,18 @@ body.foggy {
   color: rgba(255, 255, 255, 0.6);
   margin-top: 2px;
 }
-
+.tooltip {
+  position: absolute;
+  display: none;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 100;
+}
 /* Responsive cho biểu đồ */
 @media (max-width: 600px) {
   .temperature-chart {
