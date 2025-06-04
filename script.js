@@ -344,15 +344,16 @@ function isMobile() {
 }
 
 // ===== CẬP NHẬT CÁC HÀM TẠO HIỆU ỨNG =====
+
 function createRain(count, intensity, isFreezing = false) {
   const effectsContainer = document.getElementById("weatherEffects");
   const mobileMultiplier = isMobile() ? 0.5 : 1;
 
-  for (let i = 0; i < count * mobileMultiplier; i++) {
+  for (let i = 0; i < count * 3 * mobileMultiplier; i++) {
     const rain = document.createElement('div');
     rain.className = 'rain';
-    rain.style.animationDuration = `${Math.random() * 3 + 2}s`; // Thời gian từ 2s đến 5s
-    rain.style.animationDelay = `${Math.random() * 2}s`; // Độ trễ từ 0s đến 2s
+    rain.style.animationDuration = `${(Math.random() * 2)/2 + 0.5}s`; //0.5s đến 2.5s
+    rain.style.animationDelay = `${Math.random() * 2}s`; //0s đến 2s
     rain.style.left = `${Math.random() * 100}vw`;
     rain.style.top = `${Math.random() * -100}px`;
 
@@ -414,7 +415,6 @@ function createThunder() {
   thunder.className = 'thunder';
   document.getElementById("weatherEffects").appendChild(thunder);
 }
-
 // Helper functions
 function mapWeatherCode(code) {
   const weatherCodes = {
@@ -805,5 +805,4 @@ function cleanupWeatherEffects() {
     effectsContainer.innerHTML = '';
   }
 }
-
 
