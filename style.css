@@ -124,7 +124,7 @@ body.night {
 }
 
 body.rainy {
-  background: linear-gradient(135deg, #636e72 0%, #2d3436 50%, #74b9ff 100%);
+  background: linear-gradient(135deg, #3d3e3e 0%, #393a3a 50%, #717e8a 100%);
 }
 
 body.snowy {
@@ -166,9 +166,9 @@ body.foggy {
 .rain {
   position: absolute;
   width: 2px;
-  background: linear-gradient(to bottom, rgba(174, 194, 224, 0), rgba(174, 194, 224, 0.8), rgba(174, 194, 224, 0));
+  background: linear-gradient(to bottom, rgba(137, 139, 141, 0), rgba(155, 158, 164, 0.8), rgba(149, 165, 190, 0));
   animation: rainFall linear infinite;
-  border-radius: 1px;
+  border-radius: 1.5px;
 }
 
 .rain:nth-child(odd) {
@@ -384,7 +384,7 @@ body.foggy {
   }
 }
 
-/* Enhanced Thunder Effects */
+/* Thunder Effects */
 .thunder {
   position: absolute;
   width: 100%;
